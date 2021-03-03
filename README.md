@@ -28,4 +28,10 @@ The containers persist data in various directories underneath the `volumes` dire
 
 Postgres is also exposed on port 15432 for now, mainly for debugging purposes.
 
-More soon!
+### Keycloak
+
+Keycloak is available at [http://localhost:8080/auth](http://localhost:8080/auth). When the container is created, an admin user will be created with the username specified in $KEYCLOAK_ADMIN_USER and the password specified in KEYCLOAK_ADMIN_PASSWORD. If these environment variables are not set, default username is "admin" and the default password is "Pa55w0rd".
+
+### Under Development
+
+This repo is being actively developed and is still very much a work in progress. More soon!

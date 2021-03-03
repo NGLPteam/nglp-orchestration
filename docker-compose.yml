@@ -106,8 +106,8 @@ services:
       DB_USER: ${DB_USER:-nglp_db_user}
       DB_PASSWORD: ${DB_PASSWORD:-nglp_db_password}
       DB_SCHEMA: public
-      KEYCLOAK_USER: ${KEYCLOAK_DB_USER:-admin}
-      KEYCLOAK_PASSWORD: ${KEYCLOAK_DB_PASSWORD:-Pa55w0rd}
+      KEYCLOAK_USER: ${KEYCLOAK_ADMIN_USER:-admin}
+      KEYCLOAK_PASSWORD: ${KEYCLOAK_ADMIN_PASSWORD:-Pa55w0rd}
     depends_on:
       - postgres
   reverse-proxy:
