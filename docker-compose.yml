@@ -1,15 +1,9 @@
 version: '3'
 
-volumes:
-  postgres_data:
-    driver: local
-
 services:
   es01:
     image: docker.elastic.co/elasticsearch/elasticsearch:7.10.1
-    container_name: es01
-    ports:
-      - 19200:9200
+    container_name: nglp-platform-es01
     environment:
       - node.name=es01
       - cluster.name=nglp-platform
@@ -22,12 +16,12 @@ services:
         soft: -1
         hard: -1
     volumes:
-      - ./volumes/elasticsearch/data01:/usr/share/elasticsearch/data
+      - esdata01:/usr/share/elasticsearch/data
     networks:
       - elastic
   es02:
     image: docker.elastic.co/elasticsearch/elasticsearch:7.10.1
-    container_name: es02
+    container_name: nglp-platform-es02
     environment:
       - node.name=es02
       - cluster.name=nglp-platform
@@ -40,12 +34,12 @@ services:
         soft: -1
         hard: -1
     volumes:
-      - ./volumes/elasticsearch/data02:/usr/share/elasticsearch/data
+      - esdata02:/usr/share/elasticsearch/data
     networks:
       - elastic
   es03:
     image: docker.elastic.co/elasticsearch/elasticsearch:7.10.1
-    container_name: es03
+    container_name: nglp-platform-es03
     environment:
       - node.name=es03
       - cluster.name=nglp-platform
@@ -58,7 +52,7 @@ services:
         soft: -1
         hard: -1
     volumes:
-      - ./volumes/elasticsearch/data03:/usr/share/elasticsearch/data
+      - esdata03:/usr/share/elasticsearch/data
     networks:
       - elastic
   kib01:
@@ -69,15 +63,16 @@ services:
     environment:
       ELASTICSEARCH_URL: http://es01:9200
       ELASTICSEARCH_HOSTS: http://es01:9200
+      SERVER_BASEPATH: /kibana
     networks:
       - elastic
-    depends_on:
-      - es01
   beanstalkd:
     image: "bodsch/docker-beanstalkd:1.10"
     container_name: nglp-platform-beanstalkd
     networks:
       - backend
+    ports:
+      - 11300:11300
   postgres:
     image: postgres
     container_name: nglp-platform-postgres
@@ -149,3 +144,11 @@ networks:
     driver: bridge
   frontend:
     driver: bridge
+
+volumes:
+  esdata01:
+    driver: local
+  esdata02:
+    driver: local
+  esdata03:
+    driver: local

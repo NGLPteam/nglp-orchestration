@@ -8,10 +8,10 @@ Start things up with `docker-compose up`.
 
 The following containers will be started:
 
-- es01 (elastic search node)
-- es02 (elastic search node)
-- es03 (elastic search node)
-- nglp-platform-kib01 (kibana) <-- Still WIP!
+- nglp-platform-es01 (elastic search node)
+- nglp-platform-es02 (elastic search node)
+- nglp-platform-es03 (elastic search node)
+- nglp-platform-kib01 (kibana)
 - nglp-platform-beanstalkd (beanstalkd)
 - nglp-platform-postgres (postgres)
 - nglp-platform-keycloak (keycloak)
