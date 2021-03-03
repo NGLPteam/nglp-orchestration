@@ -124,7 +124,7 @@ services:
   frontend:
     container_name: nglp-platform-frontend
     build:
-      context: ../frontend
+      context: ${FRONTEND_BUILD_CONTEXT:-https://github.com/NGLPteam/nglp-wdp-frontend.git#main}
       dockerfile: Dockerfile
     networks:
       - backend

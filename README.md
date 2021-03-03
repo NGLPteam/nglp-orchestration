@@ -2,8 +2,6 @@
 
 This project uses docker and docker-compose to setup a development environment for the NGLP platforms. You'll need to install a [current version of docker](https://docs.docker.com/docker-for-mac/install/).
 
-The docker-compose file in this root expects to find the frontend application at ../frontend. To satisfy this requirement, clone `NGLPteam/nglp-wdp-frontend` at the same level as this repository. We'll remove this dependency as we develop this further.
-
 Start things up with `docker-compose up`.
 
 The following containers will be started:
@@ -28,9 +26,23 @@ The containers persist data in various directories underneath the `volumes` dire
 
 Postgres is also exposed on port 15432 for now, mainly for debugging purposes.
 
-### Keycloak
+### Service Notes
+
+#### Keycloak
 
 Keycloak is available at [http://localhost:8080/auth](http://localhost:8080/auth). When the container is created, an admin user will be created with the username specified in $KEYCLOAK_ADMIN_USER and the password specified in KEYCLOAK_ADMIN_PASSWORD. If these environment variables are not set, default username is "admin" and the default password is "Pa55w0rd".
+
+#### Frontend
+
+The frontend container's image is built from the `main` branch of NGLPteam/nglp-wdp-frontend by default. If, however, you would like to build it from your local source, create a .env file in the root of this orchestration project and set the `FRONTEND_BUILD_CONTEXT` environment variable to a relative path to the local frontend repository, such as `../frontend`. If you build from local source, you should be able to make changes in the app and see them reflected in the browser without needing to rebuild the image.
+
+### Rebuilding Images
+
+Rebuild a specific image with the following command (replace `frontend` with the container name):
+
+```
+docker-compose up --build --force-recreate --no-deps frontend
+```
 
 ### Under Development
 
