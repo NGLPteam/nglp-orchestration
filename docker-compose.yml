@@ -1,0 +1,151 @@
+version: '3'
+
+volumes:
+  postgres_data:
+    driver: local
+
+services:
+  es01:
+    image: docker.elastic.co/elasticsearch/elasticsearch:7.10.1
+    container_name: es01
+    ports:
+      - 19200:9200
+    environment:
+      - node.name=es01
+      - cluster.name=nglp-platform
+      - discovery.seed_hosts=es02,es03
+      - cluster.initial_master_nodes=es01,es02,es03
+      - bootstrap.memory_lock=true
+      - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
+    ulimits:
+      memlock:
+        soft: -1
+        hard: -1
+    volumes:
+      - ./volumes/elasticsearch/data01:/usr/share/elasticsearch/data
+    networks:
+      - elastic
+  es02:
+    image: docker.elastic.co/elasticsearch/elasticsearch:7.10.1
+    container_name: es02
+    environment:
+      - node.name=es02
+      - cluster.name=nglp-platform
+      - discovery.seed_hosts=es01,es03
+      - cluster.initial_master_nodes=es01,es02,es03
+      - bootstrap.memory_lock=true
+      - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
+    ulimits:
+      memlock:
+        soft: -1
+        hard: -1
+    volumes:
+      - ./volumes/elasticsearch/data02:/usr/share/elasticsearch/data
+    networks:
+      - elastic
+  es03:
+    image: docker.elastic.co/elasticsearch/elasticsearch:7.10.1
+    container_name: es03
+    environment:
+      - node.name=es03
+      - cluster.name=nglp-platform
+      - discovery.seed_hosts=es01,es02
+      - cluster.initial_master_nodes=es01,es02,es03
+      - bootstrap.memory_lock=true
+      - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
+    ulimits:
+      memlock:
+        soft: -1
+        hard: -1
+    volumes:
+      - ./volumes/elasticsearch/data03:/usr/share/elasticsearch/data
+    networks:
+      - elastic
+  kib01:
+    image: docker.elastic.co/kibana/kibana:7.10.1
+    container_name: nglp-platform-kib01
+    ports:
+      - 5601:5601
+    environment:
+      ELASTICSEARCH_URL: http://es01:9200
+      ELASTICSEARCH_HOSTS: http://es01:9200
+    networks:
+      - elastic
+    depends_on:
+      - es01
+  beanstalkd:
+    image: "bodsch/docker-beanstalkd:1.10"
+    container_name: nglp-platform-beanstalkd
+    networks:
+      - backend
+  postgres:
+    image: postgres
+    container_name: nglp-platform-postgres
+    volumes:
+      - ./postgres/static/docker-entrypoint-initdb.d:/docker-entrypoint-initdb.d
+      - ./volumes/postgres/data:/var/lib/postgresql/data
+    ports:
+      - "15432:5432"
+    networks:
+      - backend
+    environment:
+      POSTGRES_USER: ${DB_USER:-nglp_db_user}
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-nglp_db_password}
+      POSTGRES_MULTIPLE_DATABASES: ${KEYCLOAK_DB:-keycloak}
+  keycloak:
+    image: quay.io/keycloak/keycloak:latest
+    container_name: nglp-platform-keycloak
+    networks:
+      - backend
+    ports:
+      - 18080:8080
+    environment:
+      DB_VENDOR: POSTGRES
+      DB_ADDR: postgres
+      DB_DATABASE: ${KEYCLOAK_DB:-keycloak}
+      DB_USER: ${DB_USER:-nglp_db_user}
+      DB_PASSWORD: ${DB_PASSWORD:-nglp_db_password}
+      DB_SCHEMA: public
+      KEYCLOAK_USER: ${KEYCLOAK_DB_USER:-admin}
+      KEYCLOAK_PASSWORD: ${KEYCLOAK_DB_PASSWORD:-Pa55w0rd}
+    depends_on:
+      - postgres
+  reverse-proxy:
+    build:
+      context: ./reverse-proxy
+      dockerfile: Dockerfile
+    container_name: nglp-platform--reverse-proxy
+    volumes:
+      - ./reverse-proxy/static/conf.d:/etc/nginx/conf.d
+    ports:
+      - 8080:8080
+      - 8081:8081
+      - 8082:8082
+    restart: always
+    networks:
+      - backend
+      - elastic
+      - frontend
+  frontend:
+    container_name: nglp-platform-frontend
+    build:
+      context: ../frontend
+      dockerfile: Dockerfile
+    networks:
+      - backend
+      - frontend
+    command: ["/usr/src/app/scripts/start_dev.sh"]
+    volumes:
+      - ../frontend:/usr/src/app:delegated
+      - ../frontend/package.json:/usr/src/package.json
+      - ../frontend/yarn.lock:/usr/src/yarn.lock
+      - ./volumes/frontend/node_modules:/usr/src/app/node_modules
+      - ./volumes/frontend/dot_next:/usr/src/app/.next
+      - ./frontend/static/scripts:/usr/src/app/scripts
+networks:
+  backend:
+    driver: bridge
+  elastic:
+    driver: bridge
+  frontend:
+    driver: bridge
