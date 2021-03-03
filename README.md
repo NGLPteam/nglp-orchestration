@@ -20,9 +20,11 @@ The following containers will be started:
 
 And we're exposing the following services through an Nginx reverse-proxy which is routing top-level paths to specific containers.
 
-frontend: [http://localhost:8080](http://localhost:8080)
-kibana: [http://localhost:8080/kibana](http://localhost:8080/kibana)
-keycloak: [http://localhost:8080/auth](http://localhost:8080/auth)
+The containers persist data in various directories underneath the `volumes` directory in this repository. To wipe out existing data and start over, simply remove the `volumes` directory, run `docker compose down` and bring the containers backup with `docker compose up`.
+
+- frontend: [http://localhost:8080](http://localhost:8080)
+- kibana: [http://localhost:8080/kibana](http://localhost:8080/kibana)
+- keycloak: [http://localhost:8080/auth](http://localhost:8080/auth)
 
 Postgres is also exposed on port 15432 for now, mainly for debugging purposes.
 
