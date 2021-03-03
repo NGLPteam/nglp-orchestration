@@ -30,13 +30,19 @@ Postgres is also exposed on port 15432 for now, mainly for debugging purposes.
 
 #### Keycloak
 
-Keycloak is available at [http://localhost:8080/auth](http://localhost:8080/auth). When the container is created, an admin user will be created with the username specified in $KEYCLOAK_ADMIN_USER and the password specified in KEYCLOAK_ADMIN_PASSWORD. If these environment variables are not set, default username is "admin" and the default password is "Pa55w0rd".
+Keycloak is available at [http://localhost:8080/auth](http://localhost:8080/auth). When the container is created, an admin user will be created with the username and password specified in `KEYCLOAK_ADMIN_USER` and `KEYCLOAK_ADMIN_PASSWORD`. If these environment variables are not set, default username is `admin` and the default password is `Pa55w0rd`.
 
 #### Frontend
 
 The frontend container's image is built from the `main` branch of NGLPteam/nglp-wdp-frontend by default. If, however, you would like to build it from your local source, create a .env file in the root of this orchestration project and set the `FRONTEND_BUILD_CONTEXT` environment variable to a relative path to the local frontend repository, such as `../frontend`. If you build from local source, you should be able to make changes in the app and see them reflected in the browser without needing to rebuild the image.
 
-### Rebuilding Images
+### Docker Compose Notes
+
+#### Networking
+
+For now, this docker-compose file creates three networks and attempts to segment services to the appropriate network: backend, frontend, and elastic. This architecture should be considered fairly WIP, as we're still sorting out exactly what services will be involved in this platform.
+
+#### Rebuilding Images
 
 Rebuild a specific image with the following command (replace `frontend` with the container name):
 
